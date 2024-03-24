@@ -10,6 +10,8 @@ import UserLocationScreen from './UserCurrentLocationScreen.js';
 import DrawerMenu from './DrawerMenu.js';
 import PrivacyPolicyScreen from './DrawerScreens/PrivacyPolicy.js';
 import UserProfileScreen from './UserProfile/UserProfileScreen.js';
+import EditDetailsScreen from './UserProfile/EditDetailsScreen.js';
+import MechanicRegistrationScreen from './MechanicScreen/MechanicRegistrationScreen.js';
 import { NavigationContainer } from '@react-navigation/native';
 
 const Stack = createStackNavigator();
@@ -42,6 +44,8 @@ function AppNavigator() {
       />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
       <Stack.Screen name="UserProfile" component={UserProfileScreen}/>
+      <Stack.Screen name="EditDetails" component={EditDetailsScreen}/>
+      <Stack.Screen name="MechanicScreen" component={MechanicRegistrationScreen}/>
 
     </Stack.Navigator>
     

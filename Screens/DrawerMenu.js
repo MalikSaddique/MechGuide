@@ -1,6 +1,7 @@
 import React,  { useState } from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, Dimensions, Text } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { LinearGradient } from 'expo-linear-gradient';
 import {
   DrawerContentScrollView,
   DrawerItemList,
@@ -8,38 +9,22 @@ import {
 } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons'; 
+import { useImagePicker } from '../hooks/ImagePickerHook';
+import MechanicRegistrationScreen from './MechanicScreen/MechanicRegistrationScreen';
 
 
 const { width, height } = Dimensions.get('window');
 
 const DrawerMenu = (props) => {
-  const [profileImage, setProfileImage] = React.useState(null);
+  // const [profileImage, setProfileImage] = React.useState(null);
+  const { profileImage, handleProfileImagePress } = useImagePicker();
   const navigation= useNavigation();
-  // Example from within DrawerMenu component or a similar component
-
-  const handleProfileImagePress = async () => {
-    // Requesting permission
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (permissionResult.granted === false) {
-      alert("You've refused to allow this app to access your photos!");
-      return;
-    }
-
-    const pickerResult = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true, 
-       aspect: [1, 1], 
-       quality: 1, 
-  });
-
-  console.log(pickerResult); 
-    if (!pickerResult.canceled && pickerResult.assets) {
-     const selectedImageUri = pickerResult.assets[0].uri;
-    setProfileImage(selectedImageUri);
-      //we will upload the selected image to backend server,
-    }
-  };
   return (
     <DrawerContentScrollView {...props}>
+      <LinearGradient
+    // colors={['#4c669f', '#3b5998', '#192f6a']} 
+    colors={['#FFA726', '#FB8C00', '#FF6F00']}
+    style={styles.linearGradient}>
       <View style={styles.userInfoSection}>
       <TouchableOpacity onPress={handleProfileImagePress}>
           <Image
@@ -52,6 +37,7 @@ const DrawerMenu = (props) => {
           <Icon name="arrow-forward" style={styles.arrowIcon} />
         </TouchableOpacity>
       </View>
+      </LinearGradient>
 
       {/* <DrawerItemList {...props} /> */}
 
@@ -111,7 +97,7 @@ const DrawerMenu = (props) => {
           <Icon name="log-out-outline" color={color} size={size} />
         )}
       />
-      <TouchableOpacity style={styles.mechMode} onPress={() => {}}>
+      <TouchableOpacity style={styles.mechMode} onPress={() => {navigation.navigate('MechanicScreen')}}>
         <Text style={styles.buttonText}>Mechanic Mode</Text>
       </TouchableOpacity>
 
@@ -125,7 +111,7 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
     paddingTop: 20,
     paddingBottom: 20,
-    backgroundColor: '#1A73E9', 
+    //backgroundColor: '#1A73E9', 
     // backgroundColor: '#1A73E8', // Replace with your preferred background color
     // paddingTop: 48, // Adjust the padding to fit your layout
     // paddingBottom: 24, // Adjust the padding to fit your layout
@@ -150,13 +136,13 @@ const styles = StyleSheet.create({
     marginEnd: width* 0.05,
   },
   userName: {
-    color: '#1A73E8',
+    color: '#FF7A00',
     fontSize: 20,
     fontWeight: 'bold',
   },
   arrowIcon: {
     fontSize: 24,
-    color: '#1A73E8',
+    color: '#FF7A00',
     marginLeft: 10,
   },
   mechMode:{

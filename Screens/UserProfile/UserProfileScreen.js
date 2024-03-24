@@ -1,53 +1,52 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Dimensions, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons'; 
 import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
+import { useImagePicker } from '../../hooks/ImagePickerHook';
+import MyTabs from '../../hooks/UserTabNavigator';
+import { LinearGradient } from 'expo-linear-gradient';
 
 
 const { width, height } = Dimensions.get('window');
-const UserProfileScreen = ({ navigation, route }) => {
-    // const userImageUri = route.params?.userImageUri;
-    const handleChangeProfileImage = () => {
-        // Logic to change the profile image
-      };
+const UserProfileScreen = ({ navigation}) => {
+    const { profileImage, handleProfileImagePress } = useImagePicker();
   return (
     
-    <ScrollView style={styles.container}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+<ScrollView style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Icon name="arrow-back" size={30} color="#000" />
       </TouchableOpacity>
+      <LinearGradient
+    // colors={['#4c669f', '#3b5998', '#192f6a']} 
+    colors={['#FFA726', '#FB8C00', '#FF6F00']}
+    style={styles.linearGradient}>
       <View style={styles.headerContainer}>
-        
-     
-        {/* User image and name */}
-        <View style={styles.profileContainer}>
-        <Image
-         source={require('../../assets/Icons/userDefault.png')}
-        style={styles.profileImage}
-      />
-      <TouchableOpacity style={styles.cameraIcon} onPress={handleChangeProfileImage}>
-        <Ionicons name="camera" size={20} color="#fff" />
-      </TouchableOpacity>
-      </View>
+        <TouchableOpacity style={styles.profileContainer} onPress={handleProfileImagePress}>
+          <Image
+            source={profileImage ? { uri: profileImage } : require('../../assets/Icons/userDefault.png')}
+            style={styles.profileImage}
+          />
+          <View style={styles.cameraIcon}>
+            <Ionicons name="camera" size={20} color="#fff" />
+            </View>
+          </TouchableOpacity>
         <Text style={styles.userName}>Malik Siddique</Text>
       </View>
+      </LinearGradient>
 
-      {/* User details */}
       <View style={styles.detailSection}>
         <Text style={styles.sectionTitle}>My Details</Text>
+        <Text style={styles.detailText}>Username: MalikS</Text>
         <Text style={styles.detailText}>Email: maliksaddique139@gmail.com</Text>
         <Text style={styles.detailText}>Phone: 0310-8741623</Text>
-        <TouchableOpacity style={styles.button} onPress={() => {/* Edit details logic */}}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('EditDetails')}>
           <Text style={styles.buttonText}>Edit Details</Text>
         </TouchableOpacity>
+        <MyTabs/>
       </View>
+    
 
-      {/* More sections like 'My Vehicles', 'Settings', 'Change Password', etc. */}
-      
-      {/* Log Out Button */}
-      <TouchableOpacity style={styles.button} onPress={() => {/* Log out logic */}}>
-        <Text style={styles.buttonText}>Log Out</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -56,6 +55,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  linearGradient: {
+    // position: 'absolute', 
+    // left: 0,
+    // right: 0,
+    // top: 0,
+    // height: '100%', 
+    width: '100%', 
+    alignItems: 'center', 
+  },
   backButton: {
     marginLeft: width* 0.03,
     marginTop: height* 0.04,
@@ -63,9 +71,9 @@ const styles = StyleSheet.create({
 
   },
   headerContainer: {
-    alignItems: 'center',
-    paddingVertical: 20,
-    backgroundColor: '#1A73E8',
+    paddingVertical: 20, // Space above and below the content
+    alignItems: 'center', // Center content vertically
+    width: '100%'
 },
 profileImage: {
     width: 120,
@@ -110,6 +118,11 @@ buttonText: {
   fontSize: 18,
   color: '#FFFFFF',
   fontWeight: 'bold',
+},
+accountDetailsSection: {
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+    marginTop: 10,
 }
 });
 
