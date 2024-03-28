@@ -36,19 +36,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#425DA0', 
   },
-  triangleCorner: {
-    width: width * 0,
-    height: 400,
-    backgroundColor: 'transparent',
-    borderStyle: 'solid',
-    borderRightWidth: width, // Width of the screen
-    borderTopWidth: width / 3, // Half the width of the screen
-    borderRightColor: 'transparent',
-    borderTopColor: '#6677CC', // The color of the triangle
-    position: 'absolute',
-    top: 0,
-    transform: [{ rotate: '90deg' }],
-  },
+  // triangleCorner: {
+  //   width: width * 0,
+  //   height: 400,
+  //   backgroundColor: 'transparent',
+  //   borderStyle: 'solid',
+  //   borderRightWidth: width, // Width of the screen
+  //   borderTopWidth: width / 3, // Half the width of the screen
+  //   borderRightColor: 'transparent',
+  //   borderTopColor: '#6677CC', // The color of the triangle
+  //   position: 'absolute',
+  //   top: 0,
+  //   transform: [{ rotate: '90deg' }],
+  // },
   logo: {
     width: width * 0.6, // 60% of screen width
     height: height * 0.3, // 30% of screen height
@@ -85,20 +85,20 @@ const styles = StyleSheet.create({
    top:width*0.020,
    flexShrink:0
   },
-  triangleCornerBottom:{
-    width: width * 0,
-    height: 400,
-    backgroundColor: 'transparent',
-    borderStyle: 'solid',
-    borderRightWidth: width, // Width of the screen
-    borderTopWidth: width / 3, // Half the width of the screen
-    borderRightColor: 'transparent',
-    borderTopColor: '#6677CC', // The color of the triangle
-    position: 'absolute',
-    top: 300,
-    transform: [{ rotate: '270deg' }],
-    zIndex:-1,
-  }
+  // triangleCornerBottom:{
+  //   width: width * 0,
+  //   height: 400,
+  //   backgroundColor: 'transparent',
+  //   borderStyle: 'solid',
+  //   borderRightWidth: width, // Width of the screen
+  //   borderTopWidth: width / 3, // Half the width of the screen
+  //   borderRightColor: 'transparent',
+  //   borderTopColor: '#6677CC', // The color of the triangle
+  //   position: 'absolute',
+  //   top: 300,
+  //   transform: [{ rotate: '270deg' }],
+  //   zIndex:-1,
+  // }
 });
 
 export default StartScreen;

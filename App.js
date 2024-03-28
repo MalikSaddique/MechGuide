@@ -6,7 +6,9 @@ const App = () => {
   return (
     <NavigationContainer>
       <AppNavigator />
+      
     </NavigationContainer>
+    // </RegistrationDataProvider>
   );
 };
 

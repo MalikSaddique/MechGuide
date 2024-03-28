@@ -12,6 +12,14 @@ import PrivacyPolicyScreen from './DrawerScreens/PrivacyPolicy.js';
 import UserProfileScreen from './UserProfile/UserProfileScreen.js';
 import EditDetailsScreen from './UserProfile/EditDetailsScreen.js';
 import MechanicRegistrationScreen from './MechanicScreen/MechanicRegistrationScreen.js';
+import BasicInformationScreen from './MechanicScreen/BasicInfoScreen.js';
+import { RegistrationDataProvider } from '../hooks/RegistrationDataContext.js';
+import CNICScreen from './MechanicScreen/CNICScreen.js';
+import SelfieWithIDScreen from './MechanicScreen/SelfieWithIdScreen.js';
+import CertificateScreen from './MechanicScreen/CertificateInfo.js';
+import DrivingLicense from './MechanicScreen/DrivingLicenseScreen.js';
+import MechanicRegistrationConfirmationScreen from './MechanicScreen/MechanicConfirmationScreen.js';
+
 import { NavigationContainer } from '@react-navigation/native';
 
 const Stack = createStackNavigator();
@@ -29,6 +37,7 @@ function DrawerNavigator() {
 
 function AppNavigator() {
   return (
+    <RegistrationDataProvider>
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       
       <Stack.Screen name="Start" component={StartScreen} />
@@ -46,8 +55,16 @@ function AppNavigator() {
       <Stack.Screen name="UserProfile" component={UserProfileScreen}/>
       <Stack.Screen name="EditDetails" component={EditDetailsScreen}/>
       <Stack.Screen name="MechanicScreen" component={MechanicRegistrationScreen}/>
+      <Stack.Screen name="BasicInformationScreen" component={BasicInformationScreen}/>
+      <Stack.Screen name="MechCNICScreen" component={CNICScreen}/>
+      <Stack.Screen name="SelfieWithId" component={SelfieWithIDScreen}/>
+      <Stack.Screen name="CertificateScreenMech" component={CertificateScreen}/>
+      <Stack.Screen name="LicenseScreenMech" component={DrivingLicense}/>
+      <Stack.Screen name="MechRegistrationConfirmation" component={MechanicRegistrationConfirmationScreen}/>
+      
 
     </Stack.Navigator>
+    </RegistrationDataProvider>
     
   );
 }
