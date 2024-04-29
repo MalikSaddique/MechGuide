@@ -1,14 +1,18 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './Screens/AppNavigator';
+import DrawerMenu from './Screens/DrawerMenu';
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <AppNavigator />
+      <SafeAreaProvider>
       
+    <NavigationContainer>
+       <AppNavigator />
     </NavigationContainer>
-    // </RegistrationDataProvider>
+      </SafeAreaProvider>
+ 
   );
 };
 

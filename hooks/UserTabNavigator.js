@@ -50,12 +50,12 @@ const WalletScreen = () => <View><Text>Wallet Screen</Text></View>;
 
 const styles = StyleSheet.create({
     tabBarStyle: {
-        marginTop:height * 0.35,
+        marginTop:height/height * 300,
       backgroundColor: '#FF7A00', // Tab bar background color
-      borderTopColor: 'transparent', // No border top
-      height: 60, // Height of tab bar
+     borderTopColor: 'transparent', // No border top
+      height: 70, // Height of tab bar
       paddingBottom: 5, // Padding bottom
-      borderRadius:20,
+      borderRadius:15,
     },
     tabBarLabelStyle: {
       marginBottom: 5, // Lower the label

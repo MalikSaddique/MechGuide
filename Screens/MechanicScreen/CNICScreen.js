@@ -31,10 +31,10 @@ const CNICScreen = ({ navigation }) => {
               setCnicBack(imageUri);
               updateRegistrationData({ cnicBack: imageUri });
             }
-          }
-          if (cnicFront && cnicBack) {
-            setSuccessVisible(true);
-            setTimeout(() => setSuccessVisible(false), 3000); 
+            if (cnicFront && cnicBack) {
+              setSuccessVisible(true);
+              setTimeout(() => setSuccessVisible(false), 3000); 
+            }
           }
     }
   };

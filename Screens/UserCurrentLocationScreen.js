@@ -5,6 +5,7 @@ import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
 import { Ionicons } from '@expo/vector-icons';
 import OptionBottomSheet from './BottomSheet/OptionBottomSheet';
+import { DrawerActions } from '@react-navigation/native';
 // import DrawerMenu from './DrawerMenu';
 // import StackNavigator from './NavigationDrawer';
 

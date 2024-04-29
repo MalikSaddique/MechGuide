@@ -6,14 +6,14 @@ import { MaterialIcons } from '@expo/vector-icons';
 const MechanicRegistrationConfirmationScreen = ({ navigation }) => {
   
   const handleNextSteps = () => {
-    navigation.navigate("UserLocationScreen")
+    navigation.navigate("MechDashboardscreen")
   };
 
   return (
     <View style={styles.container}>
         <View style={styles.subcontainer}>
         <MaterialIcons name="check-circle" size={24} color="green" />
-      <Text style={styles.title}>Registration Submitted!</Text>
+      <Text style={styles.title}>Registration Completed!</Text>
       </View>
       <Text style={styles.description}>
         Your application to join as a mechanic is under review. You will receive a notification once your registration has been approved.
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: '#FFFFFF', // or any color that suits your design
+    backgroundColor: '#FFFFFF', 
   },
   subcontainer:{
  flexDirection: 'row',
