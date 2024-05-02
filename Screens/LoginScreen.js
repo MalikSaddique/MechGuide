@@ -79,8 +79,10 @@ const LoginScreen = ({ navigation }) => {
 
     // Attempt login
     try {
+      console.log("Attempting to sign in with email:", email, "and password:", password);
       await signInWithEmailAndPassword(auth, email, password);
       console.log("User logged in successfully");
+      console.log("Email:", email, "Password:", password);
       navigation.navigate("ChooseLocationScreen");
 
     } catch (error) {

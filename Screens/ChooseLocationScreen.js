@@ -18,8 +18,7 @@ const LocationScreen = ({ navigation }) => {
       />
       <Text style={styles.greeting}>Hi, nice to meet you User!</Text>
       <Text style={styles.instruction}>Choose your location to start find mechanic around you.</Text>
-      <TouchableOpacity style={styles.locationButton} onPress={()=>navigation.navigate("UserLocationScreen")}>
-      {/* <MaterialIcons name="my-location" size={24} color="#FFA500" style={styles.iconlocation}/> */}
+      <TouchableOpacity style={styles.locationButton} onPress={()=>navigation.navigate("DrawerNavigation")}>
       <Image
         source={require('../assets/Icons/Path.png')} 
         style={styles.iconLocation}

@@ -1,5 +1,5 @@
 // MechanicRegistrationConfirmationScreen.js
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { collection, query, where, getDocs } from 'firebase/firestore'; // Import Firestore modules
@@ -17,7 +17,6 @@ const MechanicRegistrationConfirmationScreen = ({ navigation }) => {
     const fetchMechanicData = async () => {
       try {
         const userId = auth.currentUser.uid; // Get current user's UID
-
         // Query Firestore collection for mechanic data where userId equals
         const q = query(collection(db, "Mechdata"), where("userId", "==", userId));
         const querySnapshot = await getDocs(q);
@@ -43,7 +42,7 @@ const MechanicRegistrationConfirmationScreen = ({ navigation }) => {
   }, []);
 
   const handleNextSteps = () => {
-    navigation.navigate("MechDashboardscreen")
+    navigation.navigate("Drawer")
   };
 
   return (

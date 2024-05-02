@@ -8,20 +8,13 @@ import { useDrawerStatus } from '@react-navigation/drawer';
 
 
 const DashboardScreen = ({ navigation }) => {
-  // const drawerStatus = useDrawerStatus();
-  // const toggleDrawer = () => {
-  //   if (drawerStatus === 'closed') {
-  //     navigation.dispatch(DrawerActions.openDrawer());
-  //   } else {
-  //     navigation.dispatch(DrawerActions.openDrawer());
-  //   }
-  // };
+
   return (
     <ScrollView style={styles.container}>
         <View style={styles.roundedContainer}>
       <TouchableOpacity style={styles.header}
           // This will open the drawer
-          onPress={() => navigation.navigate({})}>
+          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
         <Ionicons name="menu" size={30} color="#fff" />
         </TouchableOpacity>
         </View>
@@ -121,7 +114,6 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 50,
   },
-  // Add styles for other components and navigation items
 });
 
 export default DashboardScreen;

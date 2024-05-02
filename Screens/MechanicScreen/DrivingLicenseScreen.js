@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRegistrationData } from '../../hooks/RegistrationDataContext';
