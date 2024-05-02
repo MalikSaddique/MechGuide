@@ -1,40 +1,106 @@
 import React, { useState } from 'react';
 // import LogRocket from '@logrocket/react-native';
 // LogRocket.init('kkw2cz/mechguide')
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Dimensions, Image } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Dimensions, Image, ActivityIndicator } from 'react-native';
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
+import { auth, db } from "../firebase/firebase.config";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
+
 
 const { width, height } = Dimensions.get('window');
+// Assuming `app` is your Firebase app instance
+const authPersistence = getReactNativePersistence(AsyncStorage);
+//const authInstance = initializeAuth(app, { persistence: authPersistence });
 
-const InputField = ({ iconName, placeholder, secureTextEntry, toggleVisibility, visibility }) => (
-    <View style={styles.inputContainer}>
-      <FontAwesome name={iconName} size={24} color="#6D6A6A" />
-      <TextInput
-        style={styles.input}
-        
-        placeholder={placeholder}
-        secureTextEntry={secureTextEntry}
-        autoCapitalize="none"
-      />
-      {toggleVisibility && (
-        <TouchableOpacity onPress={visibility}>
-          <FontAwesome5 name={secureTextEntry ? 'eye-slash' : 'eye'} size={20} color="#6D6A6A" />
-        </TouchableOpacity>
-      )}
-    </View>
-  );
+const InputField = ({
+  iconName,
+  placeholder,
+  secureTextEntry,
+  toggleVisibility,
+  visibility,
+  onChangeText,
+  value
+}) => (
+  <View style={styles.inputContainer}>
+    <FontAwesome name={iconName} size={24} color="#6D6A6A" />
+    <TextInput
+      style={styles.input}
+      placeholder={placeholder}
+      secureTextEntry={secureTextEntry}
+      autoCapitalize="none"
+      onChangeText={onChangeText} 
+      value={value}                
+    />
+    {toggleVisibility && (
+      <TouchableOpacity onPress={visibility}>
+        <FontAwesome5
+          name={secureTextEntry ? "eye-slash" : "eye"}
+          size={20}
+          color="#6D6A6A"
+        />
+      </TouchableOpacity>
+    )}
+  </View>
+);
 
 const LoginScreen = ({ navigation }) => {
-    const [passwordVisible, setPasswordVisible] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setpassword] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const Login_user = async () => {
+    // Reset previous errors
+    setEmailError("");
+    setPasswordError("");
+    setError("");
+    setLoading(true);
+
+    // Validate email
+    if (!email) {
+      setEmailError("Please enter your email address.");
+      setLoading(false); // Set loading to false if validation fails
+
+      return;
+    }
+
+    // Validate password
+    if (!password) {
+      setPasswordError("Please enter your password.");
+      setLoading(false); // Set loading to false if validation fails
+
+      return;
+    }
+
+    // Attempt login
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      console.log("User logged in successfully");
+      navigation.navigate("ChooseLocationScreen");
+
+    } catch (error) {
+      setError("Login failed. Please check your credentials.");
+      console.error("Login error:", error.message);
+    }
+    finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
-        <View style={styles.topHeader}>
-      <Text style={styles.header}>Login Account</Text>
-      <Text style={styles.subheader}>Welcome back! </Text>
+      <View style={styles.header}>
+        <Text style={styles.header}>Login Account</Text>
+        <Text style={styles.subheader}>Welcome back! </Text>
       </View>
 
       <Image
-        source={require('../assets/MechGuideLogo/LogoMechGuide.png')}
+        source={require("../assets/MechGuideLogo/LogoMechGuide.png")}
         style={styles.logo}
       />
 
@@ -42,28 +108,38 @@ const LoginScreen = ({ navigation }) => {
       <Text style={styles.tagline}>Find the Right Mechanic For You</Text>
 
       <View style={styles.inputContainerPass}>
-        <FontAwesome name='user' size={24} style={styles.inputIcon}/>
-      <InputField
-        style={styles.input}
-        //iconName="user"
-        placeholder="Enter email id"
-       keyboardType="email-address"
-      />
+        <FontAwesome name="user" size={24} style={styles.inputIcon} />
+        <InputField
+          style={styles.input}
+          //iconName="user"
+          placeholder="Enter email id"
+          keyboardType="email-address"
+          onChangeText={setEmail}
+          value={email}
+        />
       </View>
-    <View style={styles.inputContainerPass}>
-    <FontAwesome name='lock' size={24} style={styles.inputIcon}/>
-      <InputField
-        style={styles.input}
-        placeholder="Enter password"
-        secureTextEntry={!passwordVisible}
-        toggleVisibility={true}
-        visibility={()=> setPasswordVisible(!passwordVisible)}
-      />
-     
-    </View>
+      {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
 
-      <TouchableOpacity style={styles.button} onPress={() => {}}>
-        <Text style={styles.buttonText}>Login</Text>
+      <View style={styles.inputContainerPass}>
+        <FontAwesome name="lock" size={24} style={styles.inputIcon} />
+        <InputField
+          style={styles.input}
+          placeholder="Enter password"
+          secureTextEntry={!passwordVisible}
+          toggleVisibility={true}
+          visibility={() => setPasswordVisible(!passwordVisible)}
+          onChangeText={setpassword}
+          value={password}
+        />
+      </View>
+      {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      {/* {loading ? <ActivityIndicator size="large" color="#FF7A00" /> : null} */}
+
+      <TouchableOpacity style={styles.button} onPress={Login_user} disabled={loading}>
+        
+        {loading ? <ActivityIndicator size="large" color="white" /> : <Text style={styles.buttonText}>Login</Text>}
+
       </TouchableOpacity>
 
       <View style={styles.orContainer}>
@@ -73,25 +149,40 @@ const LoginScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.socialContainer}>
-  <SocialButton iconName="google" size={25} color="#DB4437" onPress={() => {}}/>
-  <SocialButton iconName="apple" size={25} color="black" onPress={() => {}} />
-</View>
+        <SocialButton
+          iconName="google"
+          size={25}
+          color="#DB4437"
+          onPress={() => {}}
+        />
+        <SocialButton
+          iconName="apple"
+          size={25}
+          color="black"
+          onPress={() => {}}
+        />
+      </View>
 
-<View style={styles.registerContainer}>
-  <Text style={styles.registerText}>Not registered yet? </Text>
-  <TouchableOpacity onPress={() => navigation.navigate('RegisterScreen')}>
-    <Text style={styles.registerButton}>Create Account</Text>
-  </TouchableOpacity>
-</View>
+      <View style={styles.registerContainer}>
+        <Text style={styles.registerText}>Not registered yet? </Text>
+        <TouchableOpacity onPress={() => navigation.navigate("RegisterScreen")}>
+          <Text style={styles.registerButton}>Create Account</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const SocialButton = ({ iconName, onPress, color, size, bgColor }) => (
-    <TouchableOpacity style={styles.socialButton} onPress={onPress}>
-      <FontAwesome name={iconName} size={size} color={color} backgroundColor={bgColor} />
-    </TouchableOpacity>
-  );
+  <TouchableOpacity style={styles.socialButton} onPress={onPress}>
+    <FontAwesome
+      name={iconName}
+      size={size}
+      color={color}
+      backgroundColor={bgColor}
+    />
+  </TouchableOpacity>
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -102,20 +193,25 @@ const styles = StyleSheet.create({
     width:'100%',
     flexDirection:'column',
   },
+  errorText: {
+    color: "red",
+    marginBottom: 10,
+    textAlign: "center",
+  },
   header: {
     fontSize: width * 0.06, 
     color: '#FFFFFF',
     fontWeight: '700',
     marginBottom: 4,
-    marginTop: height* 0.11,
-    marginLeft:-180,
+    marginTop: 30,
+    marginLeft: width*-0.27,
     fontFamily:'Roboto',
   },
   subheader: {
     fontSize: width * 0.05,
     color: '#FFFFFF',
-    marginBottom: 16,
-    marginLeft:-180,
+    marginBottom: width*.1,
+    marginLeft: width*-0.27,
   },
   eyeIcon: {
     //paddingRight: 10,

@@ -1,7 +1,8 @@
 import React,  { useState } from 'react';
-import { View, StyleSheet, Image, TouchableOpacity, Dimensions, Text } from 'react-native';
+import { View, StyleSheet, Image, TouchableOpacity, Dimensions, Text, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
+import { signOut } from "firebase/auth";
 import {
   DrawerContentScrollView,
   DrawerItemList,
@@ -11,14 +12,41 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons'; 
 import { useImagePicker } from '../hooks/ImagePickerHook';
 import MechanicRegistrationScreen from './MechanicScreen/MechanicRegistrationScreen';
-
-
+import { db, storage, auth } from '../firebase/firebase.config';
+import { collection, query, where, getDocs } from "firebase/firestore"; 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import handleLogout from './DrawerScreens/LogOut';
 const { width, height } = Dimensions.get('window');
 
 const DrawerMenu = (props) => {
   // const [profileImage, setProfileImage] = React.useState(null);
   const { profileImage, handleProfileImagePress } = useImagePicker();
   const navigation= useNavigation();
+  
+//Mechanic registration function
+  const Mechanic_registration = async () => {
+    try {
+      const userId = auth.currentUser.uid;
+      
+      // Perform the database query to check if the current user's ID exists in the backend data
+      const q = query(collection(db, "Mechdata"), where("userId", "==", userId));
+      const querySnapshot = await getDocs(q);
+  
+      // Check if the querySnapshot has any documents
+      if (!querySnapshot.empty) {
+        // If the query result is not empty, navigate to 'MechRegistrationConfirmation'
+        navigation.navigate('MechRegistrationConfirmation');
+      } else {
+        // If the query result is empty, navigate to 'MechanicScreen'
+        navigation.navigate('MechanicScreen');
+      }
+    } catch (e) {
+      console.error("Error checking mechanic registration: ", e);
+      // Handle error, maybe show a toast or alert
+    }
+  };
+  
+
   return (
     <DrawerContentScrollView {...props}>
       <LinearGradient
@@ -92,7 +120,7 @@ const DrawerMenu = (props) => {
       />
        <DrawerItem
         label="Log Out"
-        onPress={() => { /* navigate to mechanic mode */ }}
+        onPress={()=>handleLogout(navigation)}
         icon={({ color, size }) => (
           <Icon name="log-out-outline" color={color} size={size} />
         )}
@@ -111,15 +139,6 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
     paddingTop: 20,
     paddingBottom: 20,
-    //backgroundColor: '#1A73E9', 
-    // backgroundColor: '#1A73E8', // Replace with your preferred background color
-    // paddingTop: 48, // Adjust the padding to fit your layout
-    // paddingBottom: 24, // Adjust the padding to fit your layout
-    // paddingLeft: 20, // Aligns with the other drawer items
-    // paddingRight: 20, // Ensures padding is consistent
-    // flexDirection: 'row', // Layout direction for the avatar and name
-    // alignItems: 'center', // Vertical alignment
-    // justifyContent: 'space-between', 
   },
   userImage: {
     width: 90,

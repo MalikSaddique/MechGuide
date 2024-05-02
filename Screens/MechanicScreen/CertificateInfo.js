@@ -1,80 +1,149 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, Dimensions, Platform, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRegistrationData } from '../../hooks/RegistrationDataContext';
 import Icon from 'react-native-vector-icons/Ionicons';
 import SuccessMessage from '../../hooks/SuccessMessage';
+import { collection, addDoc } from "firebase/firestore"; 
+import { db, storage, auth } from '../../firebase/firebase.config';
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
-const {width, height}= Dimensions.get('window')
+const { width, height } = Dimensions.get('window');
 
 const CertificateScreen = ({ navigation }) => {
   const { registrationData, updateRegistrationData } = useRegistrationData();
   const [certificateImageFront, setCertificateImageFront] = useState(registrationData.certificateImageFront);
   const [certificateImageBack, setCertificateImageBack] = useState(registrationData.certificateImageBack);
-  const certificateFrontSource = certificateImageFront ? { uri: certificateImageFront } : require('../../assets/Icons/CertificateFront.png');
-  const certificateBackSource = certificateImageBack ? { uri: certificateImageBack } : require('../../assets/Icons/CertificateBack.png');
   const [successVisible, setSuccessVisible] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
 
   const pickImage = async (side) => {
     let result = await ImagePicker.launchImageLibraryAsync({
-    //  mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
 
-    if (!result.canceled) {
-        if (result.assets && result.assets.length > 0 ) {
-            const imageUri = result.assets[0].uri;
-            if (side === 'front') {
-              setCertificateImageFront(imageUri);
-              updateRegistrationData({ certificateImageFront: imageUri });
-            } else {
-              setCertificateImageBack(imageUri);
-              updateRegistrationData({ certificateImageBack: imageUri });
-            }
-          }
-          if (certificateImageFront && certificateImageBack) {
-            setSuccessVisible(true);
-            setTimeout(() => setSuccessVisible(false), 3000); 
-          }
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const imageUri = result.assets[0].uri;
+      console.log('Picked image uri:', imageUri);
+      if (side === 'front') {
+        setCertificateImageFront(imageUri);
+        updateRegistrationData({ certificateImageFront: imageUri });
+      } else {
+        setCertificateImageBack(imageUri);
+        updateRegistrationData({ certificateImageBack: imageUri });
+      }
     }
   };
 
+  const handleNext = async () => {
+    try {
+      setIsLoading(true);
 
-  const handleNext = () => {
-    if (!certificateImageFront|| !certificateImageBack) {
-      Alert.alert('Error', 'Please upload both front and back sides of your Certificate.');
-      return;
+      const user = auth.currentUser;
+      const userId = user.uid;
+
+      const frontImageUrl = await uploadImageToStorage(certificateImageFront, 'certificate_front.jpg');
+      const backImageUrl = await uploadImageToStorage(certificateImageBack, 'certificate_back.jpg');
+
+      updateRegistrationData({
+        certificateImageFront: frontImageUrl,
+        certificateImageBack: backImageUrl
+      });
+
+      await saveRegistrationDataToFirestore(frontImageUrl, backImageUrl, userId);
+
+      setSuccessVisible(true);
+      setTimeout(() => setSuccessVisible(false), 3000);
+
+      navigation.navigate('LicenseScreenMech');
+    } catch (error) {
+      console.error("Error: ", error);
+      Alert.alert('Error', 'Failed to proceed. Please try again later.');
+    } finally {
+      setIsLoading(false);
     }
-    navigation.navigate('LicenseScreenMech'); 
+  };
+  
+  const uploadImageToStorage = async (imageUri, imageName) => {
+    const storageRef = ref(storage, 'images/' + imageName);
+    const response = await fetch(imageUri);
+    const blob = await response.blob();
+    const uploadTask = uploadBytesResumable(storageRef, blob);
+
+    return new Promise((resolve, reject) => {
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          // Handle upload progress if needed
+        },
+        (error) => {
+          console.error("Error uploading image: ", error);
+          reject(error);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref)
+            .then((downloadURL) => {
+              resolve(downloadURL);
+            })
+            .catch((error) => {
+              console.error("Error getting download URL: ", error);
+              reject(error);
+            });
+        }
+      );
+    });
+  };
+
+  const saveRegistrationDataToFirestore = async (frontImageUrl, backImageUrl, userId) => {
+    try {
+      await addDoc(collection(db, "Mechdata"), {
+        userId: userId,
+        firstName: registrationData.firstName,
+        lastName: registrationData.lastName,
+        profileImage: registrationData.profileImage,
+        cnicFront: registrationData.cnicFront,
+        cnicBack: registrationData.cnicBack,
+        holdingCnicImage: registrationData.holdingCnicImage,
+        certificateImageFront: frontImageUrl,
+        certificateImageBack: backImageUrl,
+        drivingLicense: registrationData.drivingLicense,
+        status: "pending"
+      });
+      console.log("Registration data saved successfully to Firestore");
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      throw error;
+    }
   };
 
   return (
     <View style={styles.container}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Icon name="arrow-back" size={30} color="#000" />
       </TouchableOpacity>
-      <SuccessMessage visible={successVisible} message="Image Sucessfully Uploaded!" />
+      <SuccessMessage visible={successVisible} message="Image Successfully Uploaded!" />
       <Text style={styles.headerText}>Certificate (front side)</Text>
       <TouchableOpacity style={styles.imagePicker} onPress={() => pickImage('front')}>
-          <Image source={certificateFrontSource} style={styles.image} />
-          {/* <Text style={styles.addPhotoText}>Add a photo</Text> */}
+        <Image source={{ uri: certificateImageFront }} style={styles.image} />
       </TouchableOpacity>
 
       <Text style={styles.headerText}>Certificate (back side)</Text>
       <TouchableOpacity style={styles.imagePicker} onPress={() => pickImage('back')}>
-        {/* {cnicBack ? ( */}
-          <Image source={certificateBackSource} style={styles.image} />
+        <Image source={{ uri: certificateImageBack }} style={styles.image} />
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-        <Text style={styles.buttonText}>Next</Text>
+        {isLoading ? (
+          <ActivityIndicator color="#FFFFFF" />
+        ) : (
+          <Text style={styles.buttonText}>Next</Text>
+        )}
       </TouchableOpacity>
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -89,7 +158,6 @@ const styles = StyleSheet.create({
     zIndex: 10, 
     backgroundColor: 'transparent', 
     padding: 20, 
-
   },
   headerText: {
     fontSize: 18,
@@ -111,10 +179,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     borderRadius: 10,
-  },
-  addPhotoText: {
-    color: '#C0C0C0',
-    fontSize: 16,
   },
   nextButton: {
     backgroundColor: '#FF7A00',

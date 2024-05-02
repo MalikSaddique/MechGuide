@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, Platform, Alert, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRegistrationData } from '../../hooks/RegistrationDataContext';
 import Icon from 'react-native-vector-icons/Ionicons';
 import SuccessMessage from '../../hooks/SuccessMessage';
+import { storage } from '../../firebase/firebase.config';
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 const { width, height } = Dimensions.get('window');
 
 const SelfieWithIDScreen = ({ navigation }) => {
-    const { registrationData, updateRegistrationData } = useRegistrationData();
+  const { registrationData, updateRegistrationData } = useRegistrationData();
   const [selfieImage, setSelfieImage] = useState(null);
   const [successVisible, setSuccessVisible] = useState(false);
-  
+  const [isLoading, setIsLoading] = useState(false); // State to manage loading indicator
 
   const pickSelfieImage = async () => {
     let result = await ImagePicker.launchCameraAsync({
@@ -21,44 +23,89 @@ const SelfieWithIDScreen = ({ navigation }) => {
     });
 
     if (!result.canceled && result.assets) {
-        const imageUri = result.assets[0].uri; 
-        setSelfieImage(imageUri);
-        updateRegistrationData({ holdingCnicImage: imageUri });
-        setSuccessVisible(true); 
-        setTimeout(() => setSuccessVisible(false), 3000); 
-      }
+      const imageUri = result.assets[0].uri;
+      setSelfieImage(imageUri);
+      updateRegistrationData({ holdingCnicImage: imageUri });
+      setSuccessVisible(true);
+      setTimeout(() => setSuccessVisible(false), 3000);
+    }
   };
 
-  const handleNext = () => {
-    if (selfieImage) {
-        updateRegistrationData({ holdingCnicImage: selfieImage });
-      }
-    console.log('Image submitted', selfieImage);
-    navigation.navigate('CertificateScreenMech'); 
+  const handleNext = async () => {
+    try {
+      setIsLoading(true); // Set loading to true when starting image upload
+
+      // Upload image to Firebase Storage
+      const imageUrl = await uploadImageToStorage(selfieImage, 'selfie_with_id.jpg');
+      console.log("Selfie with ID image URL:", imageUrl);
+
+      // Update registration data with image URL
+      updateRegistrationData({ holdingCnicImage: imageUrl });
+
+      // Navigate to the next screen
+      navigation.navigate('CertificateScreenMech');
+
+    } catch (error) {
+      console.error("Error: ", error);
+      // Handle error here
+      Alert.alert('Error', 'Failed to proceed. Please try again later.');
+    } finally {
+      setIsLoading(false); // Set loading to false when image upload is complete or fails
+    }
+  };
+
+  const uploadImageToStorage = async (imageUri, imageName) => {
+    const storageRef = ref(storage, 'images/' + imageName);
+    const response = await fetch(imageUri);
+    const blob = await response.blob();
+    const uploadTask = uploadBytesResumable(storageRef, blob);
+
+    return new Promise((resolve, reject) => {
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          // Handle upload progress if needed
+        },
+        (error) => {
+          console.error("Error uploading image: ", error);
+          reject(error);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref)
+            .then((downloadURL) => {
+              resolve(downloadURL);
+            })
+            .catch((error) => {
+              console.error("Error getting download URL: ", error);
+              reject(error);
+            });
+        }
+      );
+    });
   };
 
   return (
     <View style={styles.container}>
-         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Icon name="arrow-back" size={30} color="#000" />
       </TouchableOpacity>
-      <SuccessMessage visible={successVisible} message="Image Sucessfully Uploaded!" />
+      <SuccessMessage visible={successVisible} message="Image Successfully Uploaded!" />
       <Text style={styles.title}>Selfie with ID</Text>
       <View style={styles.instructionsContainer}>
         <Text style={styles.instructions}>
           Please take a clear selfie with your ID card in hand.
         </Text>
-       <Image source={selfieImage? { uri: selfieImage } : require('../../assets/Icons/SelfiePhoto.png')} style={styles.selfieImage} />
+        <Image source={selfieImage ? { uri: selfieImage } : require('../../assets/Icons/SelfiePhoto.png')} style={styles.selfieImage} />
         <TouchableOpacity onPress={pickSelfieImage} style={styles.addButton}>
           <Text style={styles.addButtonText}>Add a photo</Text>
         </TouchableOpacity>
       </View>
       <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-        <Text style={styles.buttonText}>Next</Text>
+        {isLoading ? (
+          <ActivityIndicator color="#FFFFFF" />
+        ) : (
+          <Text style={styles.buttonText}>Next</Text>
+        )}
       </TouchableOpacity>
-      {/* <Text style={styles.supportText}>
-        If you have questions, please contact our customer support.
-      </Text> */}
     </View>
   );
 };
@@ -70,13 +117,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
   },
-  backButton:{
-    position: 'absolute', 
-    top: Platform.OS === 'ios' ? 44 : 20, 
-    left: 10, 
-    zIndex: 10, 
-    backgroundColor: 'transparent', 
-    padding: 20, 
+  backButton: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 44 : 20,
+    left: 10,
+    zIndex: 10,
+    backgroundColor: 'transparent',
+    padding: 20,
   },
   title: {
     fontSize: 22,
@@ -122,13 +169,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
-  },
-  supportText: {
-    position: 'absolute',
-    bottom: 80,
-    fontSize: 14,
-    color: '#0000FF',
-    textDecorationLine: 'underline',
   },
 });
 

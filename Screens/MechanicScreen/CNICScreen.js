@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, Dimensions, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRegistrationData } from '../../hooks/RegistrationDataContext';
 import Icon from 'react-native-vector-icons/Ionicons';
 import SuccessMessage from '../../hooks/SuccessMessage';
+import { storage } from '../../firebase/firebase.config';
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 const {width, height}= Dimensions.get('window')
 
@@ -12,6 +14,7 @@ const CNICScreen = ({ navigation }) => {
   const [cnicFront, setCnicFront] = useState(registrationData.cnicFront);
   const [cnicBack, setCnicBack] = useState(registrationData.cnicBack);
   const [successVisible, setSuccessVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const pickImage = async (side) => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -41,13 +44,61 @@ const CNICScreen = ({ navigation }) => {
 
 
 
-  const handleNext = () => {
-    if (!cnicFront || !cnicBack) {
-      Alert.alert('Error', 'Please upload both front and back sides of your CNIC.');
-      return;
+  const handleNext = async () => {
+    try {
+      setIsLoading(true); // Set loading to true when starting image upload
+
+      // Upload images to Firebase Storage
+      const frontImageUrl = await uploadImageToStorage(cnicFront, 'cnic_front.jpg');
+      const backImageUrl = await uploadImageToStorage(cnicBack, 'cnic_back.jpg');
+
+      // Update registration data with image URLs
+      updateRegistrationData({ cnicFront: frontImageUrl, cnicBack: backImageUrl });
+
+      navigation.navigate('SelfieWithId'); 
     }
-    navigation.navigate('SelfieWithId'); 
+    // if (!cnicFront || !cnicBack) {
+    //   Alert.alert('Error', 'Please upload both front and back sides of your CNIC.');
+    //   return;
+    // }
+    catch (error) {
+      console.error("Error: ", error);
+      // Handle error here
+      Alert.alert('Error', 'Failed to proceed. Please try again later.');
+    } finally {
+      setIsLoading(false); // Set loading to false when image upload is complete or fails
+    }
   };
+
+  const uploadImageToStorage = async (imageUri, imageName) => {
+    const storageRef = ref(storage, 'images/' + imageName);
+    const response = await fetch(imageUri);
+    const blob = await response.blob();
+    const uploadTask = uploadBytesResumable(storageRef, blob);
+
+    return new Promise((resolve, reject) => {
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          // Handle upload progress if needed
+        },
+        (error) => {
+          console.error("Error uploading image: ", error);
+          reject(error);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref)
+            .then((downloadURL) => {
+              resolve(downloadURL);
+            })
+            .catch((error) => {
+              console.error("Error getting download URL: ", error);
+              reject(error);
+            });
+        }
+      );
+    });
+  };
+
 
   return (
     <View style={styles.container}>
@@ -71,7 +122,11 @@ const CNICScreen = ({ navigation }) => {
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-        <Text style={styles.buttonText}>Next</Text>
+      {isLoading ? (
+          <ActivityIndicator  color="white" />
+        ) : (
+          <Text style={styles.buttonText}>Next</Text>
+        )}
       </TouchableOpacity>
     </View>
   );

@@ -5,6 +5,8 @@ import { useRegistrationData } from '../../hooks/RegistrationDataContext';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { MaterialIcons } from '@expo/vector-icons';
 import SuccessMessage from '../../hooks/SuccessMessage';
+import {storage } from '../../firebase/firebase.config';
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 const { width, height } = Dimensions.get('window');
 
@@ -22,7 +24,7 @@ const DrivingLicense = ({ navigation }) => {
       quality: 1,
     });
 
-    if (!result.cancelled && result.assets) {
+    if (!result.canceled && result.assets) {
         const imageUri = result.assets[0].uri; 
         setLicenseImage(imageUri);
         updateRegistrationData({ drivingLicense: imageUri });
@@ -31,13 +33,58 @@ const DrivingLicense = ({ navigation }) => {
       }
   };
 
-  const handleNext = () => {
-    if (licenseImage) {
-        updateRegistrationData({ holdingCnicImage: licenseImage });
+  const handleNext = async () => {
+    try {
+      if (!licenseImage) {
+        throw new Error("Please upload a driving license image");
       }
-    console.log('Image submitted', licenseImage);
-    navigation.navigate('MechRegistrationConfirmation'); 
+
+      // Upload image to Firebase Storage
+      const imageUrl = await uploadImageToStorage(licenseImage, 'driving_license.jpg');
+      console.log("Driving license image URL:", imageUrl);
+
+      // Update registration data with image URL
+      updateRegistrationData({ drivingLicense: imageUrl });
+
+      // Navigate to the next screen
+      navigation.navigate('MechRegistrationConfirmation');
+    } catch (error) {
+      console.error("Error:", error);
+      // Handle error here
+      Alert.alert('Error', error.message);
+    }
   };
+
+  const uploadImageToStorage = async (imageUri, imageName) => {
+    const storageRef = ref(storage, 'images/' + imageName);
+    const response = await fetch(imageUri);
+    const blob = await response.blob();
+    const uploadTask = uploadBytesResumable(storageRef, blob);
+
+    return new Promise((resolve, reject) => {
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          // Handle upload progress if needed
+        },
+        (error) => {
+          console.error("Error uploading image:", error);
+          reject(error);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref)
+            .then((downloadURL) => {
+              resolve(downloadURL);
+            })
+            .catch((error) => {
+              console.error("Error getting download URL:", error);
+              reject(error);
+            });
+        }
+      );
+    });
+  };
+
+
 
   return (
     <View style={styles.container}>

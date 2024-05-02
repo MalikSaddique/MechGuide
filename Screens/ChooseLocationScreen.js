@@ -8,25 +8,6 @@ import * as Permissions from 'expo-permissions';
 const { width, height } = Dimensions.get('window');
 
 const LocationScreen = ({ navigation }) => {
-  // const [location, setLocation] = useState(null);
-
-  // useEffect(() => {
-  //   getLocationAsync();
-  // }, []);
-
-  // const getLocationAsync = async () => {
-  //   let { status } = await Permissions.askAsync(Permissions.LOCATION);
-  //   if (status !== 'granted') {
-  //     Alert.alert('Permission to access location was denied');
-  //     return;
-  //   }
-
-  //   let currentLocation = await Location.getCurrentPositionAsync({
-  //     accuracy: Location.Accuracy.BestForNavigation,
-  //   });
-  //   setLocation(currentLocation);
-  //   navigation.navigate('UserLocationScreen', { location: currentLocation });
-  // };
 
   return (
     <View style={styles.container}>
