@@ -10,7 +10,6 @@ const { width, height } = Dimensions.get('window');
 const SelfieWithIDScreen = ({ navigation }) => {
     const { registrationData, updateRegistrationData } = useRegistrationData();
   const [selfieImage, setSelfieImage] = useState(null);
-  const [holdingCnicImage, setholdingCnicImage]= useState(useRegistrationData.holdingCnicImage);
   const [successVisible, setSuccessVisible] = useState(false);
   
 
