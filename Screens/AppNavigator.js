@@ -22,6 +22,7 @@ import MechanicRegistrationConfirmationScreen from './MechanicScreen/MechanicCon
 import DashboardScreen from './MechanicScreen/MechanicDashboard.js/DashboardScreen.js';
 import MechanicDrawer from './MechanicScreen/MechanicDashboard.js/MechanicDrawer.js';
 import MyDrawer from './MechanicScreen/MechanicDashboard.js/MyDrawer.js';
+import ComplaintForm from './DrawerScreens/FeedbackComplaints.js';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { faL } from '@fortawesome/free-solid-svg-icons';
@@ -58,6 +59,7 @@ function AppNavigator() {
         options={{ headerShown: false }}
       />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+      <Stack.Screen name="FeedbackComplaints" component={ComplaintForm} />
       <Stack.Screen name="UserProfile" component={UserProfileScreen}/>
       <Stack.Screen name="EditDetails" component={EditDetailsScreen}/>
       <Stack.Screen name="MechanicScreen" component={MechanicRegistrationScreen}/>

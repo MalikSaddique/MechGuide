@@ -76,13 +76,19 @@ const DrawerMenu = (props) => {
           <Icon name="home-outline" color={color} size={size} />
         )}
       />
-      <DrawerItem
-        label="My Wallet"
-        onPress={() => { /* navigate to mechanic mode */ }}
+         <DrawerItem
+        label="Privacy Policy"
+        onPress={() => props.navigation.navigate('PrivacyPolicy')}
         icon={({ color, size }) => (
-          <Icon name="wallet-outline" color={color} size={size} />
+          <Icon name="construct-outline" color={color} size={size} />
         )}
       />
+       {/* <DrawerItem
+        label="Feedback & Complaints"
+        onPress={() => { /* navigate to mechanic mode */ }
+        {/* icon={({ color, size }) => (
+          <Icon name="wallet-outline" color={color} size={size} />
+        )} */}
       <DrawerItem
         label="Service History"
         onPress={() => { /* navigate to mechanic mode */ }}
@@ -111,11 +117,11 @@ const DrawerMenu = (props) => {
           <Icon name="settings-outline" color={color} size={size} />
         )}
       />
-      <DrawerItem
-        label="Privacy Policy"
-        onPress={() => props.navigation.navigate('PrivacyPolicy')}
+       <DrawerItem
+        label="Feedback & Complaints"
+        onPress={() => props.navigation.navigate('FeedbackComplaints')}
         icon={({ color, size }) => (
-          <Icon name="construct-outline" color={color} size={size} />
+          <Icon name="chatbubble-outline" color={color} size={size} />
         )}
       />
        <DrawerItem

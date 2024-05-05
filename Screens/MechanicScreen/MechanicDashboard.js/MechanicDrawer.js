@@ -3,6 +3,7 @@ import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/Ionicons';
+import handleLogout from '../../DrawerScreens/LogOut';
 
 const MechanicDrawer = ({ navigation }) => {
   return (
@@ -78,7 +79,7 @@ const MechanicDrawer = ({ navigation }) => {
       <DrawerItem
         label="Log Out"
         icon={({ size }) => <Icon name="log-out-outline" size={size} />}
-        onPress={() => {/* Implement log out functionality */}}
+        onPress={handleLogout(navigation)}
       />
     </DrawerContentScrollView>
   );

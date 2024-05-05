@@ -125,12 +125,12 @@ const CertificateScreen = ({ navigation }) => {
       <SuccessMessage visible={successVisible} message="Image Successfully Uploaded!" />
       <Text style={styles.headerText}>Certificate (front side)</Text>
       <TouchableOpacity style={styles.imagePicker} onPress={() => pickImage('front')}>
-        <Image source={{ uri: certificateImageFront }} style={styles.image} />
+        <Image source={certificateImageFront? { uri: certificateImageFront  } : require('../../assets/Icons/CertificateFront.png')} style={styles.image} />
       </TouchableOpacity>
 
       <Text style={styles.headerText}>Certificate (back side)</Text>
       <TouchableOpacity style={styles.imagePicker} onPress={() => pickImage('back')}>
-        <Image source={{ uri: certificateImageBack }} style={styles.image} />
+      <Image source={certificateImageBack? { uri: certificateImageBack  } : require('../../assets/Icons/CertificateBack.png')} style={styles.image} />
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
