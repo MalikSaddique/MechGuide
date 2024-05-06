@@ -61,7 +61,12 @@ const MechanicRegistrationConfirmationScreen = ({ navigation }) => {
             </Text>
           )}
           {mechanicData.status === 'accepted' && (
-            <Text style={styles.status}>Your status is accepted</Text>
+
+          <> <Text style={styles.status}>Your status is accepted</Text>
+                <TouchableOpacity style={styles.button} onPress={handleNextSteps}>
+          <Text style={styles.buttonText}>Go to Dashboard</Text>
+        </TouchableOpacity>
+        </> 
           )}
           {mechanicData.status === 'rejected' && (
             <View>
@@ -78,9 +83,7 @@ const MechanicRegistrationConfirmationScreen = ({ navigation }) => {
         In the meantime, you can check out the following resources:
       </Text> */}
       
-      <TouchableOpacity style={styles.button} onPress={handleNextSteps}>
-        <Text style={styles.buttonText}>Go to Dashboard</Text>
-      </TouchableOpacity>
+
     </View>
   );
 };

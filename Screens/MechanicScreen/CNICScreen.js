@@ -71,8 +71,10 @@ const CNICScreen = ({ navigation }) => {
   };
 
   const uploadImageToStorage = async (imageUri, imageName) => {
-    const storageRef = ref(storage, 'images/' + imageName);
-    const response = await fetch(imageUri);
+    const fileExtension = imageName.split('.').pop(); // Get the file extension
+    const uniqueFileName = `${Date.now()}_${Math.floor(Math.random() * 100000)}.${fileExtension}`; // Generate a unique file name
+
+    const storageRef = ref(storage, 'images/' + uniqueFileName);    const response = await fetch(imageUri);
     const blob = await response.blob();
     const uploadTask = uploadBytesResumable(storageRef, blob);
 

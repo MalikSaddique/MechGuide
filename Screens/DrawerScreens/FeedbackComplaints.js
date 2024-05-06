@@ -1,13 +1,14 @@
-// src/components/ComplaintForm.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Button, Alert, TouchableOpacity, Dimensions, ScrollView, 
     KeyboardAvoidingView,
     TouchableWithoutFeedback,
-Keyboard
+    Keyboard
  } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
+import { auth, db } from "../../firebase/firebase.config";
+import { collection, addDoc } from "firebase/firestore";
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 const emojis = ["😀", "😐", "😔"];
 
 const ComplaintForm = ({ navigation }) => {
@@ -19,6 +20,7 @@ const ComplaintForm = ({ navigation }) => {
   const handleEmojiSelect = (emoji) => {
     setSelectedEmoji(emoji);
   };
+
   const handleSubmit = async () => {
     if (!username || !email || !selectedEmoji) {
       Alert.alert('Error', 'Please fill out all fields before submitting.');
@@ -26,14 +28,14 @@ const ComplaintForm = ({ navigation }) => {
     }
 
     try {
-       // await db.collection('complaints').add({ (Add these lines in space of console.log to save data in backend firebase)
-      console.log({
-        username,
-        email,
-        selectedEmoji,
-        suggestions,
-        createdAt: new Date()
+      const docRef = await addDoc(collection(db, "Usercomplaint"), {
+        username: username,
+        email: email,
+        selectedEmoji: selectedEmoji,
+        suggestions: suggestions,
+        createdAt: new Date().toISOString()
       });
+      console.log("Document written with ID: ", docRef.id);
       Alert.alert('Success', 'Thank you for your feedback!');
       setUsername('');
       setEmail('');
@@ -81,12 +83,12 @@ const ComplaintForm = ({ navigation }) => {
         style={styles.inputLarge}
         onChangeText={setSuggestions}
         value={suggestions}
-        placeholder="Write your complain here..."
+        placeholder="Write your complaint here..."
         multiline
       />
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-    <Text style={styles.buttonText}>Submit</Text>
-    </TouchableOpacity>
+        <Text style={styles.buttonText}>Submit</Text>
+      </TouchableOpacity>
     </ScrollView>
     </TouchableWithoutFeedback>
     </KeyboardAvoidingView>

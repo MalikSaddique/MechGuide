@@ -1,78 +1,117 @@
-// EditDetailsScreen.js
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Button, Dimensions, TouchableOpacity } from 'react-native';
-import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
-import DrawerMenu from '../DrawerMenu';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { auth, db } from "../../firebase/firebase.config";
 import Icon from 'react-native-vector-icons/Ionicons';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const EditDetailsScreen = ({ navigation }) => {
-    const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [name, setname] = useState('');
   const [email, setEmail] = useState('');
   const [location, setLocation] = useState('');
+  const [phone, setPhone] = useState('');
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const user = auth.currentUser;
+        
+        if (user) {
+          const userRef = doc(db, 'users', user.uid);
+          const docSnap = await getDoc(userRef);
+          if (docSnap.exists()) {
+            const userData = docSnap.data();
+            setname(userData.name || '');
+            setEmail(userData.email || '');
+            setLocation(userData.location || '');
+            setPhone(userData.phone || '');
+          } else {
+            console.log("No such document!");
+          }
+        } else {
+          console.error("User not found or not logged in.");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
 
-  const handleSave = () => {
-    // Logic to save the updated details
-    // This might involve calling an API and then navigating back
-    navigation.goBack();
+    fetchUserData();
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, {
+          name: name,
+          email: email,
+          location: location,
+          phone: phone,
+        });
+        // Update successful, navigate back
+        navigation.goBack();
+      } else {
+        console.error("User not found or not logged in.");
+      }
+    } catch (error) {
+      console.error("Error updating user details:", error);
+    }
   };
 
   return (
     <View style={styles.container}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Icon name="arrow-back" size={30} color="#000" />
       </TouchableOpacity>
       <Text style={styles.header}>Profile settings</Text>
-        <View style={styles.inputContainerPass}>
-      <FontAwesome name="user" size={20} style={styles.inputIcon} />
-      <TextInput
-        value={firstName}
-        onChangeText={setFirstName}
-        placeholder="First name"
-        style={styles.input}
-      />
-      </View>
       <View style={styles.inputContainerPass}>
-      <FontAwesome name="user" size={20} style={styles.inputIcon} />
-      <TextInput
-        value={lastName}
-        onChangeText={setLastName}
-        placeholder="Last name"
-        style={styles.input}
-      />
+        <FontAwesome name="user" size={20} style={styles.inputIcon} />
+        <TextInput
+          value={name}
+          onChangeText={setname}
+          placeholder="Enter the name"
+          style={styles.input}
+        />
       </View>
-        <View style={styles.inputContainerPass}>
-    <FontAwesome name='envelope' size={20} style={styles.inputIcon}/>
-    <TextInput
-        value={email}
-        onChangeText={setEmail}
-        placeholder="Email"
-        style={styles.input}
-        keyboardType="email-address"
-      />
+
+      <View style={styles.inputContainerPass}>
+        <FontAwesome name='envelope' size={20} style={styles.inputIcon} />
+        <TextInput
+          value={email}
+          onChangeText={setEmail}
+          placeholder="Email"
+          style={styles.input}
+          keyboardType="email-address"
+        />
       </View>
       <View style={styles.inputContainerPass}>
         <FontAwesome name="phone" size={20} style={styles.inputIcon} />
-        <TextInput style={styles.input} placeholder="Enter Phone No" keyboardType="phone-pad" />
-        </View>
-        <View style={styles.inputContainerPass}>
+        <TextInput
+          value={phone}
+          onChangeText={setPhone}
+          placeholder="Phone"
+          style={styles.input}
+          keyboardType="phone-pad"
+        />
+      </View>
+      <View style={styles.inputContainerPass}>
         <FontAwesome name="map-marker" size={20} style={styles.inputIcon} />
         <TextInput
-        value={location}
-        onChangeText={setLocation}
-        placeholder="Location"
-        style={styles.input}
-      />
-        </View>
-        <TouchableOpacity>
+          value={location}
+          onChangeText={setLocation}
+          placeholder="Location"
+          style={styles.input}
+        />
+      </View>
+      <TouchableOpacity onPress={handleSave}>
         <View style={styles.button}>
-    <Text style={styles.buttonText}>Save</Text>
-</View>
-</TouchableOpacity>
-
+          <Text style={styles.buttonText}>Save</Text>
+        </View>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -90,46 +129,30 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     padding: 20,
-    textAlign:'center'
+    textAlign: 'center'
   },
-  label: {
-    marginVertical: 10,
-  },
-  input: {
-    // borderWidth: 1,
-    // borderColor: '#ddd',
-    // padding: 10,
-    // marginBottom: 20,
-    // borderRadius: 5,
-    fontSize: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd', // White colored underline for each input
-    color: '#000', // Text input color
-    marginHorizontal: 20,
-    margin: 10,
-    paddingVertical: 5,
-  },
-  inputContainerPass:{
+  inputContainerPass: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
     width: '100%',
-    paddingHorizontal:15,
+    paddingHorizontal: 15,
     marginBottom: 15,
   },
   inputIcon: {
     marginLeft: 10,
-    color:'#6D6A6A',
+    color: '#6D6A6A',
   },
-//   input: {
-//     flex: 1,
-//     width: '100%', 
-//     paddingVertical: 10,
-//     marginLeft:10,
-//     //backgroundColor: '#FFFFFF', 
-//     //fontSize: width * 0.04, 
-//   },
+  input: {
+    fontSize: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    color: '#000',
+    marginHorizontal: 20,
+    margin: 10,
+    paddingVertical: 5,
+  },
   button: {
     width: '100%',
     padding: 12,
@@ -137,11 +160,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#FF7A00',
-    marginVertical:10, 
+    marginVertical: 10,
     marginBottom: 10,
   },
   buttonText: {
-    fontSize: width * 0.05, 
+    fontSize: width * 0.05,
     color: '#FFFFFF',
     fontWeight: 'bold',
   },

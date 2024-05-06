@@ -1,4 +1,4 @@
-import React,  { useState } from 'react';
+import React,  { useEffect, useState } from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, Dimensions, Text, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -17,13 +17,18 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import handleLogout from './DrawerScreens/LogOut';
 const { width, height } = Dimensions.get('window');
+import { onSnapshot, doc } from "firebase/firestore";
+
 
 const DrawerMenu = (props) => {
   // const [profileImage, setProfileImage] = React.useState(null);
   const { profileImage, handleProfileImagePress } = useImagePicker();
+  const [userData, setUserData] = useState(null); // Initialize as null to indicate data is loading
+
   const navigation= useNavigation();
-  
-//Mechanic registration function
+ 
+  //Mechanics registration function 
+
   const Mechanic_registration = async () => {
     try {
       const userId = auth.currentUser.uid;
@@ -46,7 +51,22 @@ const DrawerMenu = (props) => {
     }
   };
   
-
+  
+    useEffect(() => {
+        const user = auth.currentUser;
+        if (user) {
+            const unsubscribe = onSnapshot(doc(db, "users", user.uid), (doc) => {
+                if (doc.exists()) {
+                    setUserData(doc.data());
+                } else {
+                    console.log("No such document!");
+                }
+            });
+    
+            return () => unsubscribe(); // Unsubscribe when component unmounts
+        }
+    }, []); // Run only once when component mounts
+  
   return (
     <DrawerContentScrollView {...props}>
       <LinearGradient
@@ -61,7 +81,7 @@ const DrawerMenu = (props) => {
           />
       </TouchableOpacity>
       <TouchableOpacity style={styles.profileTextContainer} onPress={()=>navigation.navigate('UserProfile')}>
-          <Text style={styles.userName}>Malik Siddique</Text>
+          <Text style={styles.userName}>{userData.name}</Text>
           <Icon name="arrow-forward" style={styles.arrowIcon} />
         </TouchableOpacity>
       </View>
@@ -131,7 +151,7 @@ const DrawerMenu = (props) => {
           <Icon name="log-out-outline" color={color} size={size} />
         )}
       />
-      <TouchableOpacity style={styles.mechMode} onPress={() => {navigation.navigate('MechanicScreen')}}>
+      <TouchableOpacity style={styles.mechMode} onPress={Mechanic_registration}>
         <Text style={styles.buttonText}>Mechanic Mode</Text>
       </TouchableOpacity>
 
@@ -151,6 +171,7 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 70,
     marginBottom: 10,
+alignItems:'center',
   },
   profileTextContainer: {
     flexDirection: 'row',
